@@ -1,0 +1,47 @@
+int led = 13; // Ledimizi 13 numaralı pine baglıyoruz
+int sensor = 2; //2 nolu dijital pinimiz sensör girişimiz
+int state = LOW; // hareket olmadığında durum=&quot;0&quot; olacak
+int val = 0; // ilk başta value değeri &quot;0&quot; tanımladık
+int ldr = 0;
+void setup()
+{
+  pinMode(led, OUTPUT); // 13 nolu pin çıkış olarak tanımlandı
+  pinMode(sensor, INPUT); // 2 nolu pin giriş olarak tanımlandı
+  Serial.begin(9600);
+}
+void loop()
+{
+  int ldrd = analogRead(A0); // LDR mizi A0 pinine baglıyoruz
+  Serial.println(ldrd);
+  val = digitalRead(sensor); // sensörü oku value değerine at
+  if ((val == HIGH) && (ldrd < 400))
+    pir(1);
+  if (state == LOW) {
+    state = HIGH;
+  }
+  else {
+    digitalWrite(led, LOW); // LED i kapat
+    delay(20);
+    if (state == HIGH) {
+
+      state = LOW;
+    }
+    else
+    {
+      pir(2);
+    }
+  }
+}
+void pir (int sayi)
+{
+  switch (sayi)
+  {
+    case 1:
+      digitalWrite(led, HIGH);
+      delay(60000);
+      break;
+    case 2:
+      digitalWrite(led, LOW);
+      delay(20);
+  }
+}
