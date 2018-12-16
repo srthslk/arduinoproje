@@ -1,3 +1,4 @@
+// SERHAT HASLAK
 int led = 13; // Ledimizi 13 numaralı pine baglıyoruz
 int sensor = 2; //2 nolu dijital pinimiz sensör girişimiz
 int state = LOW; // hareket olmadığında durum=&quot;0&quot; olacak
