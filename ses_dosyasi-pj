@@ -1,0 +1,143 @@
+#include <Wire.h>
+#include "DYPlayerArduino.h"  //amfi kütüphanesi
+#include <DS323x.h>           //Saat ütüphanesi
+DY::Player player;
+DS323x rtc;
+int buton1 = 2;  //sabah baslangic saati ayari
+int buton2 = 3;  //sabah baslangic saati ayari
+int buton3 = 4;  //sabah baslangic saati ayari
+int led1 = 5;    //hangi saat'te başlayacağini görmek için buton üstü led
+int led2 = 6;    //hangi saat'te başlayacağini görmek için buton üstü led
+int led3 = 7;    //hangi saat'te başlayacağini görmek için buton üstü led
+int sabahsaat = 4;
+int aksamsaat = 19;
+unsigned long simdikiZaman2 = 0;
+unsigned long eskiZaman2 = 0;
+int potPin = A0;   //ses yukseklik ayari icin
+int eskiDeger = -1;
+int ilksaat = 5;
+int sonsaat = 18;
+void setup() {
+  Wire.begin();
+  Serial.begin(9600);
+  delay(1000);
+  pinMode(buton1, INPUT_PULLUP);
+  pinMode(buton2, INPUT_PULLUP);
+  pinMode(buton3, INPUT_PULLUP);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  player.begin();
+  player.setVolume(30);  //ses seviyesi(0 - 30)
+  rtc.attach(Wire);
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  pinMode(potPin, INPUT);
+  //rtc.now(DateTime(2025, 03, 20, 17, 9, 50));  //### GÜNCEL SAATİ AYARLAMA ###
+}
+
+void loop() {
+  DateTime now = rtc.now();  // Güncel saati bu satırda okuyoruz
+  /*if (now.day() < 10) { Serial.print("0"); }
+  Serial.print(now.day());  // Gün
+  Serial.print(".");
+  if (now.month() < 10) { Serial.print("0"); }
+  Serial.print(now.month());  // Ayı
+  Serial.print(".");
+  Serial.print(now.year());  // Yıl
+  Serial.print(" | ");*/
+  simdikiZaman2 = millis();
+  if (simdikiZaman2 - eskiZaman2 > 5000) {
+    eskiZaman2 = simdikiZaman2;
+    if (now.hour() < 10) { Serial.print("0"); }
+    Serial.print(now.hour());  // Saat
+    Serial.print(":");
+    if (now.minute() < 10) { Serial.print("0"); }
+    Serial.print(now.minute());  // Dakika
+    Serial.print(":");
+    if (now.second() < 10) { Serial.print("0"); }
+    Serial.println(now.second());  // Saniye
+  }
+  /*
+  player.setVolume(mapdeger);
+  potdeger = analogRead(pot);
+  mapdeger = map(potdeger, 0, 1023, 0, 30);
+  Serial.print(mapdeger);*/
+  int rawvalue = analogRead(potPin);
+  int potdeger = map(rawvalue, 0, 1023, 0, 30);
+
+  if (potdeger != eskiDeger) {
+    player.setVolume(potdeger);
+    Serial.print(potdeger);
+    Serial.println();
+    eskiDeger = potdeger;
+  }
+
+
+
+
+
+  if (digitalRead(buton1) == LOW) {
+    digitalWrite(led1, HIGH);
+    digitalWrite(led2, LOW);
+    digitalWrite(led3, LOW);
+    sabahsaat = 4;
+    aksamsaat = 20;
+    ilksaat = 5;
+    sonsaat = 19;
+    Serial.print("sabah saat :");
+    Serial.print(sabahsaat);
+    Serial.println();
+    Serial.print("aksam saat :");
+    Serial.print(aksamsaat);
+    Serial.println();
+  }
+
+  if (digitalRead(buton2) == LOW) {
+    digitalWrite(led1, LOW);
+    digitalWrite(led2, HIGH);
+    digitalWrite(led3, LOW);
+    sabahsaat = 5;
+    aksamsaat = 19;
+    ilksaat = 6;
+    sonsaat = 18;
+    Serial.print("sabah saat :");
+    Serial.print(sabahsaat);
+    Serial.println();
+    Serial.print("aksam saat :");
+    Serial.print(aksamsaat);
+    Serial.println();
+  }
+
+  if (digitalRead(buton3) == LOW) {
+    digitalWrite(led1, LOW);
+    digitalWrite(led2, LOW);
+    digitalWrite(led3, HIGH);
+    sabahsaat = 6;
+    aksamsaat = 18;
+    ilksaat = 7;
+    sonsaat = 17;
+    Serial.print("sabah saat :");
+    Serial.print(sabahsaat);
+    Serial.println();
+    Serial.print("aksam saat :");
+    Serial.print(aksamsaat);
+    Serial.println();
+  }
+  if ((now.hour() >= sabahsaat) && (now.hour() < aksamsaat)) {
+    if ((now.hour() <= ilksaat) || (now.hour() >= sonsaat)) {
+      if (now.minute() % 5 == 0) {
+        player.playSpecified(1);
+      }
+    }
+    if (now.minute() % 15 == 0) {
+      player.playSpecified(1);
+    }
+  }
+}
+/*if ((now.hour() >= sabahsaat) && (now.hour() < aksamsaat)) {
+    if (now.minute() % 5 == 0) {
+      player.playSpecified(1);
+    }
+  }*/
